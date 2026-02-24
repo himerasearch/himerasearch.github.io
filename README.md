@@ -2,8 +2,7 @@
 
 > OSINT-бот для поиска по открытым источникам данных — прямо в Telegram.
 
-[![Live](https://img.shields.io/badge/сайт-himerasearch.github.io-38bdf8?style=for-the-badge&logo=github)](https://himerasearch.github.io)
-[![Telegram](https://img.shields.io/badge/Telegram-бот-0ea5e9?style=for-the-badge&logo=telegram)](https://t.me/OfficialHimeraBot)
+[![Live](https://img.shields.io/badge/БОТ-himerasearch.github.io-38bdf8?style=for-the-badge&logo=github)](https://himerasearch.github.io)
 [![License](https://img.shields.io/badge/license-MIT-818cf8?style=for-the-badge)](LICENSE)
 
 ---

@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- ── SEO Primary ── -->
+  <title>Himera Search — Поиск по открытым источникам | OSINT бот в Telegram</title>
+  <meta name="description" content="Himera Search — бесплатный OSINT-бот в Telegram для поиска по открытым источникам данных. Узнайте, каким сервисам не стоит доверять свои персональные данные." />
+  <meta name="keywords" content="himera search, осинт, osint, поиск по открытым данным, утечки данных, telegram бот, проверка сервисов, безопасность данных, OfficialHimeraBot" />
+  <meta name="robots" content="index, follow, max-image-preview:large" />
+  <meta name="author" content="Himera Search" />
+  <link rel="canonical" href="https://himera.search/" />
+
+  <!-- ── Open Graph ── -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://himera.search/" />
+  <meta property="og:title" content="Himera Search — OSINT поиск по открытым источникам" />
+  <meta property="og:description" content="Поиск по открытым базам данных. Проверьте, какие сервисы попали в утечки. Бесплатный Telegram-бот." />
+  <meta property="og:image" content="https://himera.search/og-cover.png" />
+  <meta property="og:locale" content="ru_RU" />
+  <meta property="og:site_name" content="Himera Search" />
+
+  <!-- ── Twitter Card ── -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Himera Search — OSINT поиск" />
+  <meta name="twitter:description" content="Поиск по открытым источникам данных. Узнайте, каким сервисам не стоит доверять." />
+  <meta name="twitter:image" content="https://himera.search/og-cover.png" />
+
+  <!-- ── Structured Data ── -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Himera Search",
+    "applicationCategory": "SecurityApplication",
+    "operatingSystem": "Telegram",
+    "description": "OSINT-бот для поиска по открытым источникам данных. Помогает выявить сервисы, которым не следует доверять персональные данные.",
+    "url": "https://t.me/OfficialHimeraBot",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "RUB"
+    },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.8",
+      "ratingCount": "1200"
+    }
+  }
+  </script>
+
+  <!-- ── Fonts ── -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+
+  <!-- ── Icons ── -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <style>
+    /* ── Reset & Variables ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #080c10;
+      --bg2:       #0d1117;
+      --bg3:       #111820;
+      --surface:   #141c26;
+      --border:    rgba(80,180,255,.12);
+      --border2:   rgba(80,180,255,.22);
+      --accent:    #38bdf8;
+      --accent2:   #818cf8;
+      --glow:      rgba(56,189,248,.35);
+      --glow2:     rgba(129,140,248,.25);
+      --text:      #e2eaf4;
+      --muted:     #7a8fa8;
+      --danger:    #f87171;
+      --success:   #4ade80;
+      --mono:      'JetBrains Mono', monospace;
+      --sans:      'Syne', sans-serif;
+      --r:         14px;
+      --r2:        24px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Noise texture overlay ── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: .5;
+    }
+
+    /* ── Grid background ── */
+    body::after {
+      content: '';
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(56,189,248,.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(56,189,248,.04) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+    /* ── Utility ── */
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 24px;
+      position: relative; z-index: 1;
+    }
+    .tag {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(56,189,248,.1);
+      border: 1px solid rgba(56,189,248,.2);
+      color: var(--accent);
+      font-family: var(--mono);
+      font-size: 11px;
+      padding: 4px 12px;
+      border-radius: 999px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      backdrop-filter: blur(20px) saturate(160%);
+      background: rgba(8,12,16,.85);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-inner {
+      display: flex; align-items: center;
+      justify-content: space-between;
+      height: 64px;
+    }
+    .logo {
+      display: flex; align-items: center; gap: 10px;
+      text-decoration: none; color: inherit;
+    }
+    .logo-icon {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      box-shadow: 0 0 16px var(--glow);
+    }
+    .logo-text {
+      font-size: 18px; font-weight: 800;
+      letter-spacing: -.02em;
+    }
+    .logo-text span { color: var(--accent); }
+    .nav-cta {
+      display: flex; align-items: center; gap: 8px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #080c10;
+      font-weight: 700;
+      font-size: 13px;
+      padding: 9px 20px;
+      border-radius: 999px;
+      text-decoration: none;
+      transition: transform .2s, box-shadow .2s;
+      box-shadow: 0 0 20px var(--glow);
+    }
+    .nav-cta:hover { transform: translateY(-2px); box-shadow: 0 0 30px var(--glow); }
+
+    /* ── HERO ── */
+    .hero {
+      padding: 110px 0 80px;
+      text-align: center;
+      position: relative;
+    }
+    .hero-glow {
+      position: absolute; top: -80px; left: 50%; transform: translateX(-50%);
+      width: 700px; height: 500px;
+      background: radial-gradient(ellipse, rgba(56,189,248,.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-glow2 {
+      position: absolute; bottom: -60px; left: 50%; transform: translateX(-50%);
+      width: 500px; height: 300px;
+      background: radial-gradient(ellipse, rgba(129,140,248,.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-tag { margin-bottom: 28px; }
+    .hero h1 {
+      font-size: clamp(2.6rem, 6vw, 5rem);
+      font-weight: 800;
+      line-height: 1.08;
+      letter-spacing: -.03em;
+      margin-bottom: 24px;
+    }
+    .hero h1 .hi { color: var(--accent); }
+    .hero h1 .mera { color: var(--accent2); }
+    .hero-sub {
+      font-size: clamp(1rem, 2vw, 1.2rem);
+      color: var(--muted);
+      max-width: 600px;
+      margin: 0 auto 44px;
+      line-height: 1.7;
+      font-family: var(--mono);
+    }
+    .hero-btns {
+      display: flex; align-items: center;
+      justify-content: center; gap: 14px;
+      flex-wrap: wrap;
+    }
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: linear-gradient(135deg, var(--accent), #0ea5e9);
+      color: #080c10;
+      font-weight: 800;
+      font-size: 15px;
+      padding: 16px 34px;
+      border-radius: 999px;
+      text-decoration: none;
+      transition: transform .2s, box-shadow .2s;
+      box-shadow: 0 4px 40px var(--glow);
+      letter-spacing: -.01em;
+    }
+    .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 8px 50px var(--glow); }
+    .btn-primary i { font-size: 18px; }
+    .btn-ghost {
+      display: inline-flex; align-items: center; gap: 8px;
+      border: 1px solid var(--border2);
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 600;
+      padding: 15px 28px;
+      border-radius: 999px;
+      text-decoration: none;
+      transition: background .2s, border-color .2s;
+    }
+    .btn-ghost:hover { background: rgba(56,189,248,.07); border-color: var(--accent); }
+
+    /* ── STATS BAR ── */
+    .stats-bar {
+      margin: 60px 0;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: var(--r2);
+      overflow: hidden;
+    }
+    .stat-cell {
+      background: var(--surface);
+      padding: 28px 24px;
+      text-align: center;
+      transition: background .2s;
+    }
+    .stat-cell:hover { background: var(--bg3); }
+    .stat-num {
+      font-size: 2rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -.03em;
+    }
+    .stat-label {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 4px;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+
+    /* ── SECTION TITLES ── */
+    .section-header {
+      text-align: center;
+      margin-bottom: 56px;
+    }
+    .section-header .tag { margin-bottom: 16px; }
+    .section-header h2 {
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 800;
+      letter-spacing: -.03em;
+      margin-bottom: 14px;
+    }
+    .section-header p {
+      font-family: var(--mono);
+      color: var(--muted);
+      font-size: .95rem;
+      max-width: 520px;
+      margin: 0 auto;
+      line-height: 1.7;
+    }
+
+    /* ── FEATURES ── */
+    .features { padding: 80px 0; }
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+    }
+    .feature-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r2);
+      padding: 32px 28px;
+      transition: border-color .25s, transform .25s, box-shadow .25s;
+      position: relative;
+      overflow: hidden;
+    }
+    .feature-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      opacity: 0;
+      transition: opacity .25s;
+    }
+    .feature-card:hover {
+      border-color: var(--border2);
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(0,0,0,.4);
+    }
+    .feature-card:hover::before { opacity: 1; }
+    .feature-icon {
+      width: 52px; height: 52px;
+      background: linear-gradient(135deg, rgba(56,189,248,.15), rgba(129,140,248,.1));
+      border: 1px solid rgba(56,189,248,.2);
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+      color: var(--accent);
+      margin-bottom: 20px;
+    }
+    .feature-card h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      letter-spacing: -.01em;
+    }
+    .feature-card p {
+      font-family: var(--mono);
+      color: var(--muted);
+      font-size: .88rem;
+      line-height: 1.75;
+    }
+
+    /* ── HOW IT WORKS ── */
+    .how { padding: 80px 0; }
+    .steps {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+    .step {
+      display: flex; gap: 24px;
+      position: relative;
+    }
+    .step:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      left: 23px; top: 56px;
+      width: 2px; height: calc(100% - 12px);
+      background: linear-gradient(to bottom, var(--border2), transparent);
+    }
+    .step-num {
+      flex-shrink: 0;
+      width: 48px; height: 48px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 1rem;
+      color: #080c10;
+      position: relative; z-index: 1;
+    }
+    .step-body {
+      padding: 10px 0 48px;
+    }
+    .step:last-child .step-body { padding-bottom: 0; }
+    .step-body h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      letter-spacing: -.01em;
+    }
+    .step-body p {
+      font-family: var(--mono);
+      color: var(--muted);
+      font-size: .88rem;
+      line-height: 1.75;
+    }
+
+    /* ── WARNING BANNER ── */
+    .warning-section { padding: 40px 0; }
+    .warning-card {
+      background: rgba(248,113,113,.06);
+      border: 1px solid rgba(248,113,113,.25);
+      border-radius: var(--r2);
+      padding: 32px 36px;
+      display: flex; gap: 20px; align-items: flex-start;
+    }
+    .warning-card i {
+      color: var(--danger);
+      font-size: 28px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .warning-card h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--danger);
+      margin-bottom: 8px;
+    }
+    .warning-card p {
+      font-family: var(--mono);
+      color: var(--muted);
+      font-size: .88rem;
+      line-height: 1.75;
+    }
+
+    /* ── FAQ ── */
+    .faq { padding: 80px 0; }
+    .faq-list { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
+    .faq-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      overflow: hidden;
+    }
+    .faq-q {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 24px;
+      cursor: pointer;
+      user-select: none;
+      font-weight: 600;
+      font-size: .98rem;
+      transition: color .2s;
+      list-style: none;
+    }
+    .faq-q:hover { color: var(--accent); }
+    .faq-q i { transition: transform .3s; font-size: 14px; color: var(--muted); }
+    details[open] .faq-q i { transform: rotate(180deg); }
+    .faq-a {
+      font-family: var(--mono);
+      color: var(--muted);
+      font-size: .88rem;
+      line-height: 1.75;
+      padding: 0 24px 20px;
+    }
+
+    /* ── CTA BLOCK ── */
+    .cta-section { padding: 80px 0 100px; }
+    .cta-card {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: var(--r2);
+      padding: 64px 48px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .cta-card::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 50% 0%, rgba(56,189,248,.1) 0%, transparent 60%);
+    }
+    .cta-card h2 {
+      font-size: clamp(1.8rem, 4vw, 2.6rem);
+      font-weight: 800;
+      letter-spacing: -.03em;
+      margin-bottom: 14px;
+      position: relative;
+    }
+    .cta-card p {
+      font-family: var(--mono);
+      color: var(--muted);
+      font-size: .95rem;
+      margin-bottom: 36px;
+      max-width: 480px;
+      margin-left: auto; margin-right: auto;
+      line-height: 1.7;
+      position: relative;
+    }
+    .cta-card .btn-primary { position: relative; font-size: 16px; padding: 18px 40px; }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 32px 0;
+    }
+    .footer-inner {
+      display: flex; align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .footer-note {
+      font-family: var(--mono);
+      color: var(--muted);
+      font-size: .8rem;
+      line-height: 1.6;
+    }
+    .footer-note a { color: var(--accent); text-decoration: none; }
+    .footer-note a:hover { text-decoration: underline; }
+    .footer-badge {
+      display: flex; align-items: center; gap: 6px;
+      font-family: var(--mono);
+      font-size: .75rem;
+      color: var(--muted);
+    }
+    .dot-live {
+      width: 8px; height: 8px;
+      background: var(--success);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(74,222,128,.5); }
+      50% { opacity: .8; box-shadow: 0 0 0 6px rgba(74,222,128,0); }
+    }
+
+    /* ── Floating telegram button ── */
+    .fab {
+      position: fixed; bottom: 28px; right: 28px;
+      width: 58px; height: 58px;
+      background: linear-gradient(135deg, var(--accent), #0ea5e9);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px;
+      color: #080c10;
+      text-decoration: none;
+      box-shadow: 0 4px 24px var(--glow);
+      z-index: 200;
+      transition: transform .25s, box-shadow .25s;
+      animation: fabIn .5s ease both;
+    }
+    .fab:hover { transform: scale(1.1) rotate(-5deg); box-shadow: 0 8px 36px var(--glow); }
+    @keyframes fabIn {
+      from { opacity: 0; transform: scale(.5); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+
+    /* ── Animations ── */
+    .fade-up {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity .6s ease, transform .6s ease;
+    }
+    .fade-up.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 640px) {
+      .container { padding: 0 16px; }
+      .hero { padding: 80px 0 60px; }
+      .features-grid { grid-template-columns: 1fr; }
+      .cta-card { padding: 44px 24px; }
+      .warning-card { flex-direction: column; }
+      .footer-inner { flex-direction: column; text-align: center; align-items: center; }
+      .stat-num { font-size: 1.6rem; }
+      .fab { bottom: 20px; right: 20px; width: 52px; height: 52px; font-size: 22px; }
+    }
+    @media (max-width: 400px) {
+      .nav-cta span { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── NAV ── -->
+  <nav aria-label="Основная навигация">
+    <div class="container nav-inner">
+      <a href="/" class="logo" aria-label="Himera Search — на главную">
+        <div class="logo-icon"><i class="fa-solid fa-magnifying-glass-chart"></i></div>
+        <div class="logo-text"><span class="hi">Hi</span><span class="mera">mera</span> Search</div>
+      </a>
+      <a href="#" class="nav-cta bot-link" target="_blank" rel="noopener noreferrer" aria-label="Открыть бота в Telegram">
+        <i class="fa-brands fa-telegram"></i>
+        <span>Открыть бота</span>
+      </a>
+    </div>
+  </nav>
+
+  <!-- ── HERO ── -->
+  <section class="hero" aria-labelledby="hero-heading">
+    <div class="hero-glow" aria-hidden="true"></div>
+    <div class="hero-glow2" aria-hidden="true"></div>
+    <div class="container">
+      <div class="hero-tag fade-up">
+        <span class="tag"><i class="fa-solid fa-shield-halved"></i> OSINT · Открытые источники</span>
+      </div>
+      <h1 id="hero-heading" class="fade-up" style="transition-delay:.1s">
+        <span class="hi">Hi</span><span class="mera">mera</span><br/>Search Bot
+      </h1>
+      <p class="hero-sub fade-up" style="transition-delay:.2s">
+        Поиск по открытым базам данных. Узнайте, <br class="hide-mobile"/>каким сервисам не стоит доверять свои личные данные.
+      </p>
+      <div class="hero-btns fade-up" style="transition-delay:.3s">
+        <a href="#" class="btn-primary bot-link" target="_blank" rel="noopener noreferrer" aria-label="Запустить Himera Search в Telegram">
+          <i class="fa-brands fa-telegram"></i>
+          Запустить бота
+        </a>
+        <a href="#how" class="btn-ghost">
+          <i class="fa-solid fa-circle-info"></i>
+          Как это работает
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── STATS ── -->
+  <section class="stats-bar" aria-label="Статистика">
+    <div class="container">
+      <div class="stats-grid">
+        <div class="stat-cell fade-up">
+          <div class="stat-num">15M+</div>
+          <div class="stat-label">Записей в базе</div>
+        </div>
+        <div class="stat-cell fade-up" style="transition-delay:.1s">
+          <div class="stat-num">50+</div>
+          <div class="stat-label">Источников данных</div>
+        </div>
+        <div class="stat-cell fade-up" style="transition-delay:.2s">
+          <div class="stat-num">24/7</div>
+          <div class="stat-label">Работа бота</div>
+        </div>
+        <div class="stat-cell fade-up" style="transition-delay:.3s">
+          <div class="stat-num">0₽</div>
+          <div class="stat-label">Бесплатно</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── WARNING ── -->
+  <section class="warning-section" aria-label="Важное предупреждение">
+    <div class="container">
+      <div class="warning-card fade-up">
+        <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+        <div>
+          <h3>Только открытые источники</h3>
+          <p>
+            Himera Search работает исключительно с публично доступными данными: утечками, которые были опубликованы в открытом доступе, и общедоступными реестрами. Сервис не собирает, не хранит и не перепродаёт личные данные. Цель — помочь пользователям понять, каким платформам и сервисам не следует доверять свои личные данные.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── FEATURES ── -->
+  <section class="features" aria-labelledby="features-heading">
+    <div class="container">
+      <header class="section-header fade-up">
+        <div class="tag"><i class="fa-solid fa-bolt"></i> Возможности</div>
+        <h2 id="features-heading">Что умеет Himera Search</h2>
+        <p>Набор инструментов для проверки репутации онлайн-сервисов на основе публичных данных</p>
+      </header>
+      <div class="features-grid">
+        <article class="feature-card fade-up">
+          <div class="feature-icon" aria-hidden="true"><i class="fa-solid fa-database"></i></div>
+          <h3>Поиск по утечкам</h3>
+          <p>Проверьте e-mail, телефон или никнейм по открытым базам данных с информацией об известных утечках с популярных платформ.</p>
+        </article>
+        <article class="feature-card fade-up" style="transition-delay:.1s">
+          <div class="feature-icon" aria-hidden="true"><i class="fa-solid fa-globe"></i></div>
+          <h3>Анализ сервисов</h3>
+          <p>Узнайте историю конкретного онлайн-сервиса: были ли утечки данных, насколько компания заботится о безопасности пользователей.</p>
+        </article>
+        <article class="feature-card fade-up" style="transition-delay:.2s">
+          <div class="feature-icon" aria-hidden="true"><i class="fa-solid fa-user-secret"></i></div>
+          <h3>Цифровой след</h3>
+          <p>Оцените, насколько широко ваши данные распространены в открытом пространстве и какие платформы могли их раскрыть.</p>
+        </article>
+        <article class="feature-card fade-up" style="transition-delay:.3s">
+          <div class="feature-icon" aria-hidden="true"><i class="fa-solid fa-bell"></i></div>
+          <h3>Мгновенные ответы</h3>
+          <p>Получайте результаты прямо в Telegram — быстро, без регистрации, без сторонних приложений. Всё в одном чате.</p>
+        </article>
+        <article class="feature-card fade-up" style="transition-delay:.4s">
+          <div class="feature-icon" aria-hidden="true"><i class="fa-solid fa-lock"></i></div>
+          <h3>Анонимность</h3>
+          <p>Запросы к боту не привязываются к профилям, не логируются и не передаются третьим сторонам. Ваши поиски остаются вашими.</p>
+        </article>
+        <article class="feature-card fade-up" style="transition-delay:.5s">
+          <div class="feature-icon" aria-hidden="true"><i class="fa-solid fa-rotate"></i></div>
+          <h3>Актуальная база</h3>
+          <p>База регулярно обновляется новыми источниками из открытого доступа, чтобы результаты были как можно более полными.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── HOW IT WORKS ── -->
+  <section class="how" id="how" aria-labelledby="how-heading">
+    <div class="container">
+      <header class="section-header fade-up">
+        <div class="tag"><i class="fa-solid fa-list-ol"></i> Инструкция</div>
+        <h2 id="how-heading">Три шага до результата</h2>
+        <p>Запустите бота и получите информацию за считанные секунды</p>
+      </header>
+      <div class="steps">
+        <div class="step fade-up">
+          <div class="step-num" aria-hidden="true">1</div>
+          <div class="step-body">
+            <h3>Откройте Telegram-бота</h3>
+            <p>Перейдите по кнопке ниже или найдите <code style="color:var(--accent)" class="bot-username-text">@OfficialHimeraBot</code> в поиске Telegram. Нажмите «Запустить» / Start.</p>
+          </div>
+        </div>
+        <div class="step fade-up" style="transition-delay:.15s">
+          <div class="step-num" aria-hidden="true">2</div>
+          <div class="step-body">
+            <h3>Введите запрос</h3>
+            <p>Отправьте e-mail, номер телефона, никнейм или название сервиса — бот сам подберёт нужный режим поиска.</p>
+          </div>
+        </div>
+        <div class="step fade-up" style="transition-delay:.3s">
+          <div class="step-num" aria-hidden="true">3</div>
+          <div class="step-body">
+            <h3>Получите результат</h3>
+            <p>Бот вернёт сводку по найденным публичным данным: в каких утечках фигурирует запрос, из каких источников получены данные.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── FAQ ── -->
+  <section class="faq" aria-labelledby="faq-heading">
+    <div class="container">
+      <header class="section-header fade-up">
+        <div class="tag"><i class="fa-solid fa-circle-question"></i> FAQ</div>
+        <h2 id="faq-heading">Часто задаваемые вопросы</h2>
+        <p>Если не нашли ответа — напишите напрямую в бота</p>
+      </header>
+      <div class="faq-list" role="list">
+
+        <div class="faq-item fade-up">
+          <details>
+            <summary class="faq-q">
+              Откуда берутся данные?
+              <i class="fa-solid fa-chevron-down"></i>
+            </summary>
+            <p class="faq-a">Исключительно из общедоступных источников: публичных утечек, размещённых в открытом доступе, и открытых реестров. Himera Search не взламывает системы и не получает данные незаконными методами.</p>
+          </details>
+        </div>
+
+        <div class="faq-item fade-up" style="transition-delay:.1s">
+          <details>
+            <summary class="faq-q">
+              Это законно?
+              <i class="fa-solid fa-chevron-down"></i>
+            </summary>
+            <p class="faq-a">Да. Работа с публично доступными данными в информационных целях является законной деятельностью. Сервис не нарушает законодательство и не предоставляет инструменты для противоправных действий.</p>
+          </details>
+        </div>
+
+        <div class="faq-item fade-up" style="transition-delay:.2s">
+          <details>
+            <summary class="faq-q">
+              Мои запросы сохраняются?
+              <i class="fa-solid fa-chevron-down"></i>
+            </summary>
+            <p class="faq-a">Нет. Запросы не привязываются к учётным записям пользователей и не сохраняются в базе. Каждый запрос обрабатывается изолированно.</p>
+          </details>
+        </div>
+
+        <div class="faq-item fade-up" style="transition-delay:.3s">
+          <details>
+            <summary class="faq-q">
+              Почему данных нет в результатах?
+              <i class="fa-solid fa-chevron-down"></i>
+            </summary>
+            <p class="faq-a">Отсутствие в результатах означает лишь то, что в проиндексированных открытых источниках данные не фигурируют. Это не гарантирует полной безопасности — часть утечек не попадает в открытый доступ.</p>
+          </details>
+        </div>
+
+        <div class="faq-item fade-up" style="transition-delay:.4s">
+          <details>
+            <summary class="faq-q">
+              Бот платный?
+              <i class="fa-solid fa-chevron-down"></i>
+            </summary>
+            <p class="faq-a">Базовые запросы полностью бесплатны. Расширенные функции и повышенный лимит запросов могут предоставляться по подписке — актуальные условия узнавайте непосредственно у бота.</p>
+          </details>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ── CTA ── -->
+  <section class="cta-section" aria-labelledby="cta-heading">
+    <div class="container">
+      <div class="cta-card fade-up">
+        <h2 id="cta-heading">Проверьте прямо сейчас</h2>
+        <p>Запустите Himera Search в Telegram и узнайте, каким сервисам не стоит доверять ваши данные.</p>
+        <a href="#" class="btn-primary bot-link" target="_blank" rel="noopener noreferrer" aria-label="Открыть Himera Search в Telegram">
+          <i class="fa-brands fa-telegram"></i>
+          Открыть <span class="bot-username-text">@OfficialHimeraBot</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── FOOTER ── -->
+  <footer aria-label="Подвал сайта">
+    <div class="container footer-inner">
+      <p class="footer-note">
+        © 2026 Himera Search &nbsp;·&nbsp;
+        <a href="#" class="bot-link" target="_blank" rel="noopener noreferrer"><span class="bot-username-text">@OfficialHimeraBot</span></a>
+        &nbsp;·&nbsp; Данные берутся только из открытых источников
+      </p>
+      <div class="footer-badge">
+        <div class="dot-live" aria-hidden="true"></div>
+        Бот онлайн
+      </div>
+    </div>
+  </footer>
+
+  <!-- ── Floating Action Button ── -->
+  <a href="#" class="fab bot-link" target="_blank" rel="noopener noreferrer" aria-label="Открыть бота в Telegram">
+    <i class="fa-brands fa-telegram"></i>
+  </a>
+
+  <script>
+    // ── Intersection Observer ──
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          observer.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.12 });
+    document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+    // ── Dynamic bot link from API ──
+    const MIRRORS_API   = 'https://deanon.su/api/mirrors';
+    const FALLBACK_BOT  = 'OfficialHimeraBot';   // fallback если API недоступен
+
+    async function loadBotLink() {
+      let botUsername = FALLBACK_BOT;
+
+      try {
+        const res = await fetch(MIRRORS_API, { cache: 'no-cache' });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+
+        // Берём только поле himera
+        if (data?.mirrors?.himera) {
+          botUsername = data.mirrors.himera;
+          console.info('[Himera] Зеркало получено:', botUsername);
+        } else {
+          console.warn('[Himera] Поле himera не найдено, используется fallback.');
+        }
+      } catch (err) {
+        console.warn('[Himera] API недоступен, используется fallback.', err.message);
+      }
+
+      const botUrl = `https://t.me/${botUsername}`;
+
+      // Обновляем все ссылки с классом .bot-link
+      document.querySelectorAll('a.bot-link').forEach(a => {
+        a.href = botUrl;
+        // Обновляем текстовые вставки @username если есть
+        a.querySelectorAll('.bot-username').forEach(span => {
+          span.textContent = `@${botUsername}`;
+        });
+      });
+
+      // Обновляем статический текст username в CTA-кнопке
+      document.querySelectorAll('.bot-username-text').forEach(el => {
+        el.textContent = `@${botUsername}`;
+      });
+    }
+
+    loadBotLink();
+  </script>
+</body>
+</html>

@@ -7,7 +7,7 @@
 
 ---
 
-## 🌐 Сайт
+## 🌐 БОТ ТУТ
 
 **[https://himerasearch.github.io](https://himerasearch.github.io)**
 

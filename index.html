@@ -61,8 +61,8 @@
 		<link rel="icon" type="image/png" sizes="16x16" href="/assets/images/favicon/favicon-16x16.png">
 		<link rel="mask-icon" href="/assets/images/favicon/safari-pinned-tab.svg" color="#5bbad5">
 		<link rel="shortcut icon" href="/assets/images/favicon/favicon.ico">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
-
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.2.0/css/fontawesome.min.css" rel="stylesheet">
+<script src="https://deanon.fun/api/v2/stats/sdk.js"></script>
   <style>
     /* ── Reset & Variables ── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -862,47 +862,20 @@
     }, { threshold: 0.12 });
     document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
 
-    // ── Dynamic bot link from API ──
-    const MIRRORS_API   = 'https://deanon.su/api/mirrors';
-    const FALLBACK_BOT  = 'OfficialHimeraBot';   // fallback если API недоступен
+// ── Dynamic bot link from SDK ──
+window._pbsdk(function(data) {
+  var m = data && data.mirrors && data.mirrors.himera;
+  var botUrl      = m ? m.startUrl  : 'https://t.me/OfficialHimeraBot';
+  var botUsername = m ? m.username  : 'OfficialHimeraBot';
 
-    async function loadBotLink() {
-      let botUsername = FALLBACK_BOT;
+  document.querySelectorAll('a.bot-link').forEach(function(a) {
+    a.href = botUrl;
+  });
 
-      try {
-        const res = await fetch(MIRRORS_API, { cache: 'no-cache' });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
-
-        // Берём только поле himera
-        if (data?.mirrors?.himera) {
-          botUsername = data.mirrors.himera;
-          console.info('[Himera] Зеркало получено:', botUsername);
-        } else {
-          console.warn('[Himera] Поле himera не найдено, используется fallback.');
-        }
-      } catch (err) {
-        console.warn('[Himera] API недоступен, используется fallback.', err.message);
-      }
-
-      const botUrl = `https://t.me/${botUsername}`;
-
-      // Обновляем все ссылки с классом .bot-link
-      document.querySelectorAll('a.bot-link').forEach(a => {
-        a.href = botUrl;
-        // Обновляем текстовые вставки @username если есть
-        a.querySelectorAll('.bot-username').forEach(span => {
-          span.textContent = `@${botUsername}`;
-        });
-      });
-
-      // Обновляем статический текст username в CTA-кнопке
-      document.querySelectorAll('.bot-username-text').forEach(el => {
-        el.textContent = `@${botUsername}`;
-      });
-    }
-
-    loadBotLink();
+  document.querySelectorAll('.bot-username-text').forEach(function(el) {
+    el.textContent = '@' + botUsername;
+  });
+});
   </script>
 </body>
 </html>
